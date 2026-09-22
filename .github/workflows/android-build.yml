@@ -1,0 +1,62 @@
+name: Android APK Derle
+
+# Bu iş akışı, her "main" dalına gönderimde (push) ya da elle tetiklendiğinde
+# Lonca'yı Capacitor ile native Android'e sarar ve bir APK üretir.
+# Hiçbir şeyin senin telefonunda/bilgisayarında derlenmesine gerek yok —
+# tamamı GitHub'ın kendi bulut sunucusunda çalışır.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Node.js kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Java kur (Android derlemesi için gerekli)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Sabit imzalama anahtarını yükle (güncellemede veri kaybolmasın diye)
+        run: |
+          mkdir -p ~/.android
+          cp keystore/debug.keystore ~/.android/debug.keystore
+
+      - name: Bağımlılıkları yükle
+        run: npm install
+
+      - name: Android platformunu oluştur (ilk çalıştırmada)
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+
+      - name: Web dosyalarını ve native eklentileri Android projesine senkronize et
+        run: npx cap sync android
+
+      - name: Native izinleri uygula (mikrofon, bildirim, TTS)
+        run: node scripts/patch-android-manifest.js
+
+      - name: gradlew çalıştırılabilir yap
+        run: chmod +x android/gradlew
+
+      - name: APK'yı derle (debug — imzalama gerektirmez)
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: APK'yı indirilebilir çıktı olarak yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: lonca-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk

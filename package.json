@@ -1,0 +1,20 @@
+{
+  "name": "lonca",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Lonca — Ortak Ev. Capacitor ile native Android sarmalayıcı.",
+  "scripts": {
+    "sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/core": "latest",
+    "@capacitor/local-notifications": "latest",
+    "@capacitor-community/speech-recognition": "latest",
+    "@capacitor-community/text-to-speech": "latest",
+    "@onesignal/capacitor-plugin": "latest"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "latest"
+  }
+}

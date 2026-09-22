@@ -1,0 +1,9 @@
+{
+  "appId": "com.lonca.ortakev",
+  "appName": "Lonca",
+  "webDir": "www",
+  "backgroundColor": "#0B0B0F",
+  "android": {
+    "backgroundColor": "#0B0B0F"
+  }
+}

@@ -1,0 +1,437 @@
+/* ========================= */
+/* TEMEL                     */
+/* ========================= */
+*{box-sizing:border-box}
+html{min-height:100%;background:#0B0B0F}
+body{
+  min-width:320px;min-height:100vh;min-height:100dvh;margin:0;
+  background:#0B0B0F;color:#ECEDF0;
+  font-family:'Space Grotesk','Helvetica Neue',sans-serif;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid #4FF3E0;outline-offset:2px}
+
+/* ========================= */
+/* EKRAN GEÇİŞLERİ            */
+/* ========================= */
+.ekran{display:none;min-height:100vh;min-height:100dvh;padding-bottom:86px;position:relative}
+.ekran-aktif{display:flex;flex-direction:column}
+
+/* ========================= */
+/* EV EKRANI                 */
+/* ========================= */
+.ust-baslik{padding:30px 22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ust-baslik h1{margin:0;font-weight:600;font-size:26px;letter-spacing:-0.01em}
+.arama-acma-butonu{
+  width:38px;height:38px;border-radius:12px;background:#131318;color:#ECEDF0;
+  display:grid;place-items:center;flex-shrink:0;
+}
+
+.ust-baslik-butonlari{display:flex;gap:8px;flex-shrink:0}
+
+.bolum-etiketi{
+  margin:22px 22px 10px;font-size:12px;font-weight:700;letter-spacing:.03em;
+  text-transform:uppercase;color:#5B5D66;
+}
+.bolum-etiketi-ilk{margin-top:24px}
+
+.oda-listesi{margin:22px 22px 0;display:flex;flex-direction:column;gap:8px}
+.oda-satiri{
+  display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:16px;
+  background:#131318;text-decoration:none;color:inherit;
+}
+.oda-avatar{
+  display:grid;place-items:center;width:38px;height:38px;border-radius:50%;
+  font-weight:700;font-size:14px;flex-shrink:0;
+}
+.oda-bilgi{flex-grow:1;min-width:0}
+.oda-bilgi strong{display:block;font-weight:600;font-size:14px;color:#ECEDF0}
+.oda-bilgi small{display:block;margin-top:2px;font-size:12px;color:#7B7D87}
+.oda-durum-noktasi{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+.oda-satiri-ekle{background:transparent;border:1.5px dashed #25262E}
+.oda-avatar-ekle{background:#131318;color:#4FF3E0;font-size:18px;font-weight:400}
+
+.oda-sil-butonu{
+  width:38px;height:38px;border-radius:12px;color:#FF5B7A;
+  display:grid;place-items:center;flex-shrink:0;
+}
+
+.karakter-limit-notu{margin:4px 2px 0;font-size:11.5px;color:#5B5D66;text-align:center}
+
+/* ---- Ortak Alanlar ızgarası (Salon, Mutfak, Atölye, ...) ---- */
+.ortak-alan-izgara{
+  margin:0 22px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+}
+.ortak-alan-karti{
+  position:relative;overflow:hidden;border-radius:18px;padding:16px 14px;
+  min-height:104px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;
+  text-decoration:none;color:inherit;
+  background:
+    radial-gradient(circle at 15% -10%, var(--alan-wash1) 0%, transparent 55%),
+    radial-gradient(circle at 110% 120%, var(--alan-wash2) 0%, transparent 60%),
+    #131318;
+  border:1px solid var(--alan-border, #1C1C22);
+}
+.ortak-alan-karti::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:14px 14px;
+  mask-image:radial-gradient(circle at 100% 0%, #000 0%, transparent 70%);
+}
+.ortak-alan-ikon{
+  display:grid;place-items:center;width:32px;height:32px;border-radius:10px;
+  background:var(--alan-bg);color:var(--alan-renk);box-shadow:0 0 12px var(--alan-glow);
+}
+.ortak-alan-karti strong{position:relative;font-size:13.5px;font-weight:600}
+.ortak-alan-karti small{position:relative;font-size:10.5px;color:#9A9CA6;line-height:1.3}
+
+/* ========================= */
+/* SAHNE (odanın rengine göre zenginleştirilmiş arka plan) */
+/* Hem karakter odaları hem ortak alanlar (Salon, Mutfak, ...) bunu kullanır. */
+/* ========================= */
+.oda-sahne{
+  position:absolute;top:0;left:0;right:0;height:280px;pointer-events:none;z-index:0;
+  overflow:hidden;
+}
+.oda-sahne::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 18% -6%, var(--sahne-renk,#4FF3E0) 0%, transparent 42%),
+    radial-gradient(circle at 88% 18%, var(--sahne-renk,#4FF3E0) 0%, transparent 38%),
+    radial-gradient(ellipse at 50% 110%, var(--sahne-renk,#4FF3E0) 0%, transparent 55%);
+  opacity:.15;
+}
+.oda-sahne::after{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:26px 26px;
+  mask-image:linear-gradient(to bottom, #000 0%, transparent 100%);
+}
+.katman-ust{position:relative;z-index:1;background:#0B0B0F}
+.oda-mesajlar,.sohbet-formu{position:relative;z-index:1}
+
+/* ========================= */
+/* ÜST BAŞLIKLI KATMANLAR     */
+/* (Salon, Oda, Görevler, Ayarlar) */
+/* ========================= */
+.katman-ust{
+  display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;gap:10px;
+  padding:max(14px,env(safe-area-inset-top)) 16px 14px;
+  border-bottom:1px solid #1C1C22;
+}
+.katman-ust h1{margin:0;font-size:18px;font-weight:600;text-align:center}
+.geri-butonu{
+  width:38px;height:38px;border-radius:12px;background:#131318;color:#ECEDF0;
+  font-size:18px;display:grid;place-items:center;
+}
+.katman-icerik{padding:20px 22px}
+.yakinda-metni{color:#7B7D87;font-size:13px}
+
+/* ---- Arama ---- */
+.arama-input{
+  width:100%;height:44px;padding:0 14px;border-radius:14px;
+  background:#131318;border:1px solid #1C1C22;color:#ECEDF0;
+}
+.arama-input::placeholder{color:#5B5D66}
+.arama-sonuclari{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.arama-sonuc{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;
+  background:#131318;text-decoration:none;color:inherit;
+}
+.arama-sonuc-etiket{
+  margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:#5B5D66;flex-shrink:0;
+}
+
+/* ---- Görevler ---- */
+.gorev-formu{display:flex;gap:8px}
+.gorev-input{
+  flex-grow:1;height:44px;padding:0 14px;border-radius:14px;
+  background:#131318;border:1px solid #1C1C22;color:#ECEDF0;
+}
+.gorev-input::placeholder{color:#5B5D66}
+.gorev-ekle-butonu{
+  width:44px;height:44px;border-radius:14px;background:#4FF3E0;color:#0B0B0F;
+  font-size:20px;font-weight:700;flex-shrink:0;
+}
+#gorev-tekrar-secimi{margin-top:10px}
+.gorev-listesi{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.gorev-satiri{padding:12px 14px;border-radius:14px;background:#131318}
+.gorev-ust-satiri{display:flex;align-items:center;gap:10px}
+.gorev-kutucuk{
+  width:22px;height:22px;border-radius:50%;border:2px solid #4CC9F0;background:transparent;
+  flex-shrink:0;color:#0B0B0F;font-size:13px;display:grid;place-items:center;
+}
+.gorev-tamam .gorev-kutucuk{background:#4CC9F0}
+.gorev-metin{flex-grow:1;font-size:13px;color:#ECEDF0}
+.gorev-tamam .gorev-metin{color:#5B5D66;text-decoration:line-through}
+.gorev-ata-butonu{
+  width:28px;height:28px;border-radius:9px;background:#1C1C22;color:#9A9CA6;
+  font-size:13px;font-weight:700;flex-shrink:0;display:grid;place-items:center;overflow:hidden;
+}
+.gorev-sil-butonu{width:24px;height:24px;color:#5B5D66;font-size:14px;flex-shrink:0}
+.gorev-atama-cipleri{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.gorev-baslat-butonu{
+  margin-top:10px;width:100%;padding:9px;border-radius:11px;background:rgba(79,243,224,.12);
+  border:1px solid #4FF3E0;color:#4FF3E0;font-size:12px;font-weight:700;
+}
+.gorev-baslat-butonu:disabled{opacity:.6}
+.gorev-durum-notu{margin:10px 0 0;font-size:11.5px;color:#9A9CA6;font-style:italic}
+.gorev-sonuc{margin-top:10px;padding:10px;border-radius:11px;background:#0B0B0F;border:1px solid #1C1C22}
+.gorev-sonuc b{display:block;font-size:10.5px;color:#4CC9F0;text-transform:uppercase;letter-spacing:.04em}
+.gorev-sonuc p{margin:6px 0 0;font-size:12.5px;color:#C7C8D1;line-height:1.5;white-space:pre-wrap}
+
+/* ---- Ayarlar ---- */
+.ayar-karti{padding:16px;border-radius:16px;background:#131318;margin-bottom:12px}
+.ayar-karti strong{display:block;font-size:14px;font-weight:600}
+.ayar-karti small{display:block;margin-top:2px;font-size:11px;color:#7B7D87}
+.ayar-karti p{margin:10px 0 0;font-size:12px;color:#9A9CA6;line-height:1.5}
+.ayar-input{
+  width:100%;height:42px;margin-top:12px;padding:0 14px;border-radius:12px;
+  background:#0B0B0F;border:1px solid #1C1C22;color:#ECEDF0;
+}
+.ayar-input::placeholder{color:#5B5D66}
+.ayar-anahtar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:12px;font-size:12.5px;color:#C7C8D1;
+}
+.ayar-anahtar input[type="checkbox"]{width:38px;height:22px;accent-color:#4FF3E0;flex-shrink:0}
+.ayar-kaydet-butonu{
+  margin-top:8px;width:100%;padding:10px;border-radius:12px;
+  background:#4FF3E0;color:#0B0B0F;font-size:12px;font-weight:700;
+}
+.ayar-ikincil-buton{
+  margin-top:8px;width:100%;padding:10px;border-radius:12px;
+  background:#0B0B0F;color:#ECEDF0;border:1px solid #1C1C22;font-size:12px;font-weight:700;
+}
+
+/* ---- Geliştirme İste / Önerileri ---- */
+.gelistirme-aciklama{font-size:12.5px;color:#9A9CA6;line-height:1.5;margin-bottom:14px}
+.gelistirme-durum{
+  margin-top:14px;padding:12px;border-radius:12px;background:#131318;
+  border:1px solid #1C1C22;font-size:12.5px;color:#C7C8D1;line-height:1.5;
+}
+.gelistirme-oneri-satiri{display:block;padding:14px;border-radius:14px;background:#131318;margin-bottom:8px;text-decoration:none;color:inherit}
+.gelistirme-oneri-istek{font-size:13px;color:#ECEDF0;font-weight:600;display:block;margin-bottom:6px}
+.gelistirme-oneri-rozet{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.gelistirme-oneri-rozet.bekliyor{background:rgba(255,209,102,.12);color:#FFD166}
+.gelistirme-oneri-rozet.uygulandi{background:rgba(79,243,224,.12);color:#4FF3E0}
+.gelistirme-oneri-rozet.reddedildi,.gelistirme-oneri-rozet.basarisiz{background:rgba(255,91,122,.12);color:#FF5B7A}
+
+.gelistirme-istek-metni{font-size:14px;color:#ECEDF0;font-weight:600;line-height:1.5;margin-bottom:14px}
+.gelistirme-aciklama-kutusu{padding:14px;border-radius:14px;background:#131318;border:1px solid #1C1C22;font-size:13px;color:#C7C8D1;line-height:1.6}
+.gelistirme-teknik-goster{margin-top:12px;font-size:11.5px;color:#5B5D66;text-decoration:underline}
+.gelistirme-yama{
+  margin-top:10px;padding:12px;border-radius:12px;background:#0B0B0F;border:1px solid #1C1C22;
+  font-size:10.5px;color:#9A9CA6;overflow-x:auto;white-space:pre;max-height:280px;overflow-y:auto;
+}
+.gelistirme-durum-etiketi{margin-top:14px;text-align:center;font-size:12.5px;color:#9A9CA6}
+.tehlikeli-buton{
+  margin-top:12px;width:100%;padding:11px;border-radius:12px;background:rgba(255,91,122,.1);
+  border:1px solid rgba(255,91,122,.3);color:#FF5B7A;font-size:12px;font-weight:600;
+}
+
+/* ---- Yazıyor... göstergesi ---- */
+.yaziyor p{display:flex;gap:4px;align-items:center;padding:2px 0}
+.yaziyor span{width:5px;height:5px;border-radius:50%;background:#7B7D87;animation:yaziyorNokta 1.1s infinite ease-in-out}
+.yaziyor span:nth-child(2){animation-delay:.15s}
+.yaziyor span:nth-child(3){animation-delay:.3s}
+@keyframes yaziyorNokta{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-2px)}}
+
+/* Oda ekranının kendi başlığı (karakter adı + durumu) */
+.oda-baslik{display:flex;flex-direction:column;align-items:center;text-align:center}
+.oda-baslik strong{font-size:15px;font-weight:600}
+.oda-baslik small{font-size:11px;color:#7B7D87;margin-top:1px}
+
+/* ========================= */
+/* SOHBET (Oda içi mesajlaşma) */
+/* ========================= */
+.oda-mesajlar{
+  flex-grow:1;display:flex;flex-direction:column;gap:12px;
+  padding:18px 20px;overflow-y:auto;
+}
+.mesaj{display:grid;grid-template-columns:36px minmax(0,1fr);gap:10px;max-width:100%}
+.mesaj-kendi{grid-template-columns:minmax(0,1fr);justify-items:end;text-align:right}
+.mesaj-kendi .mesaj-avatar{display:none}
+.mesaj-kendi>div{max-width:82%}
+.mesaj-avatar{
+  display:grid;place-items:center;width:36px;height:36px;border-radius:12px;
+  background:#131318;font:700 13px inherit;flex-shrink:0;
+}
+.mesaj>div{padding:10px 12px;border:1px solid #1C1C22;border-radius:6px 16px 16px;background:#131318}
+.mesaj-kendi>div{background:#1B2C29;border-color:#2A4A44;border-radius:16px 6px 16px 16px}
+.mesaj b{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:#7B7D87;font-weight:600}
+.mesaj-kendi b{justify-content:flex-end}
+.mesaj time{font-size:9px;font-weight:400}
+.mesaj p{margin:5px 0 0;color:#ECEDF0;font-size:13px;line-height:1.45;text-align:left}
+.mesaj-dinle-butonu{
+  margin-top:6px;width:26px;height:26px;border-radius:8px;color:#7B7D87;
+  background:rgba(255,255,255,.04);display:inline-grid;place-items:center;
+}
+.mesaj-dinle-butonu:active{color:#4FF3E0;background:rgba(79,243,224,.12)}
+.mesaj-foto{display:block;width:100%;max-width:220px;margin-top:6px;border-radius:12px}
+
+.sohbet-formu{
+  display:grid;grid-template-columns:38px minmax(0,1fr) 38px 40px;gap:8px;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid #1C1C22;
+}
+.sohbet-formu button,.sohbet-input{
+  height:40px;border-radius:13px;background:#131318;border:1px solid #1C1C22;
+}
+.sohbet-input{width:100%;padding:0 14px}
+.sohbet-input::placeholder{color:#5B5D66}
+.sohbet-gonder{background:#4FF3E0!important;color:#0B0B0F!important;font-weight:700}
+.sohbet-mikrofon.dinliyor{background:#FF5B7A!important;animation:mikrofonNabiz 1.1s ease-in-out infinite}
+@keyframes mikrofonNabiz{0%,100%{box-shadow:0 0 0 0 rgba(255,91,122,.5)}50%{box-shadow:0 0 0 9px rgba(255,91,122,0)}}
+
+/* ========================= */
+/* KAMERA                    */
+/* ========================= */
+.kamera-overlay{position:fixed;inset:0;z-index:950;display:flex;flex-direction:column;background:#000}
+.kamera-overlay[hidden]{display:none}
+.kamera-video{flex:1;width:100%;height:100%;object-fit:cover}
+.kamera-canvas{display:none}
+.kamera-kontroller{
+  position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;
+  padding:20px 26px max(20px,env(safe-area-inset-bottom));
+}
+.kamera-kapat,.kamera-kontroller-bosluk{
+  width:46px;height:46px;border:1px solid rgba(255,255,255,.3);border-radius:50%;
+  background:rgba(0,0,0,.4);color:#fff;font-size:20px;
+}
+.kamera-kontroller-bosluk{visibility:hidden}
+.kamera-cek{width:70px;height:70px;border:4px solid #fff;border-radius:50%;background:rgba(255,255,255,.15)}
+.kamera-cek:active{background:rgba(255,255,255,.4)}
+
+/* ========================= */
+/* ALT GEZİNME                */
+/* ========================= */
+.alt-bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:500;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  padding:8px 6px max(8px,env(safe-area-inset-bottom));
+  background:#0B0B0F;border-top:1px solid #1C1C22;
+}
+.alt-bar-secim{
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;color:#5B5D66;font-size:10px;font-weight:600;
+}
+.alt-bar-secim.aktif{color:#4FF3E0}
+
+/* ========================= */
+/* YENİ KARAKTER SİHİRBAZI    */
+/* ========================= */
+.sihirbaz{display:flex;flex-direction:column;min-height:calc(100vh - 130px);min-height:calc(100dvh - 130px)}
+.sihirbaz-adimlar{display:flex;justify-content:center;gap:7px;margin-bottom:22px}
+.sihirbaz-nokta{width:7px;height:7px;border-radius:50%;background:#25262E}
+.sihirbaz-nokta.aktif{background:#4FF3E0;box-shadow:0 0 8px rgba(79,243,224,.6)}
+
+.sihirbaz-adim{display:none;flex-direction:column;gap:8px;flex-grow:1}
+.sihirbaz-adim.adim-aktif{display:flex}
+
+.sihirbaz-etiket{font-size:12px;font-weight:600;color:#9A9CA6;margin-top:14px}
+.sihirbaz-etiket:first-child{margin-top:0}
+.sihirbaz-input{
+  width:100%;height:46px;padding:0 14px;border-radius:14px;
+  background:#131318;border:1px solid #1C1C22;color:#ECEDF0;
+}
+.sihirbaz-input::placeholder{color:#5B5D66}
+
+.renk-paleti{display:flex;flex-wrap:wrap;gap:10px}
+.renk-ornegi{width:36px;height:36px;border-radius:50%;border:2px solid transparent}
+.renk-ornegi.aktif{border-color:#ECEDF0;box-shadow:0 0 0 2px #0B0B0F, 0 0 10px currentColor}
+
+.foto-secici{display:flex;align-items:center;gap:14px}
+.foto-onizleme{
+  width:56px;height:56px;border-radius:50%;background:#131318;border:1px solid #1C1C22;
+  display:grid;place-items:center;color:#5B5D66;font-size:18px;flex-shrink:0;
+  background-size:cover;background-position:center;overflow:hidden;
+}
+.foto-sec-butonu{
+  padding:10px 16px;border-radius:12px;background:#131318;border:1px solid #1C1C22;
+  font-size:12px;font-weight:600;color:#ECEDF0;
+}
+
+.cip-grubu{display:flex;flex-wrap:wrap;gap:8px}
+.cip{
+  padding:9px 14px;border-radius:20px;background:#131318;border:1px solid #1C1C22;
+  font-size:12.5px;color:#C7C8D1;
+}
+.cip.aktif{background:rgba(79,243,224,.12);border-color:#4FF3E0;color:#4FF3E0}
+
+.sk-onizleme-karti{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:30px 10px}
+.sk-onizleme-karti .oda-avatar{width:64px;height:64px;font-size:22px;margin-bottom:6px}
+.sk-onizleme-karti strong{font-size:17px;font-weight:600}
+.sk-onizleme-karti small{font-size:12px;color:#7B7D87;max-width:240px}
+
+.sihirbaz-nav{display:flex;gap:10px;margin-top:20px}
+.sihirbaz-geri-butonu,.sihirbaz-ileri-butonu,.sihirbaz-kaydet-butonu{
+  flex-grow:1;height:46px;border-radius:14px;font-size:13px;font-weight:700;
+}
+.sihirbaz-geri-butonu{background:#131318;color:#ECEDF0;border:1px solid #1C1C22}
+.sihirbaz-ileri-butonu,.sihirbaz-kaydet-butonu{background:#4FF3E0;color:#0B0B0F}
+
+/* ========================= */
+/* ORTAK ODA: İÇERİK BUTONU  */
+/* ========================= */
+.ortak-oda-icerik-butonu{
+  width:38px;height:38px;border-radius:12px;color:#ECEDF0;background:#131318;
+  border:1px solid #1C1C22;display:grid;place-items:center;flex-shrink:0;
+}
+
+/* ========================= */
+/* ODA İÇERİK LİSTESİ (Kütüphane, Mutfak, Atölye, ...) */
+/* ========================= */
+.icerik-ekle-formu{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.icerik-ek-alan-grup{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.icerik-ek-alan-etiket{font-size:11px;font-weight:600;color:#9A9CA6}
+#icerik-ekle-butonu{margin-top:2px}
+
+.icerik-liste{display:flex;flex-direction:column;gap:8px}
+.icerik-satiri{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;
+  background:#131318;border:1px solid #1C1C22;text-decoration:none;color:inherit;
+}
+.icerik-satiri-govde{flex-grow:1;min-width:0}
+.icerik-satiri-govde strong{display:block;font-size:14px;font-weight:600}
+.icerik-satiri-rozetler{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.icerik-rozet{
+  display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;
+  background:rgba(79,243,224,.1);color:#4FF3E0;
+}
+.icerik-satiri-ok{color:#5B5D66;flex-shrink:0}
+.icerik-bos{text-align:center;color:#5B5D66;font-size:13px;margin-top:20px}
+
+/* ---- Çalışma Odası zamanlayıcısı ---- */
+.icerik-zamanlayici{
+  margin-bottom:22px;padding:20px 16px;border-radius:18px;background:#131318;
+  border:1px solid #1C1C22;text-align:center;
+}
+.icerik-zamanlayici-sure{font-size:40px;font-weight:700;letter-spacing:.02em;color:#4CC9F0;font-variant-numeric:tabular-nums}
+.icerik-zamanlayici-sureler{display:flex;justify-content:center;gap:8px;margin:12px 0}
+.icerik-zamanlayici-sureler button{
+  padding:8px 14px;border-radius:20px;background:#0B0B0F;border:1px solid #1C1C22;
+  font-size:12px;color:#C7C8D1;
+}
+.icerik-zamanlayici-sureler button.aktif{background:rgba(76,201,240,.14);border-color:#4CC9F0;color:#4CC9F0}
+.icerik-zamanlayici-butonlar{display:flex;gap:10px;margin-top:6px}
+
+/* ========================= */
+/* BİLDİRİM (toast)          */
+/* ========================= */
+.bildirim-mesaji{
+  position:fixed;left:50%;bottom:94px;z-index:1200;
+  width:min(calc(100% - 30px),440px);padding:13px 16px;border-radius:15px;
+  background:#17181D;border:1px solid #25262E;color:#ECEDF0;
+  box-shadow:0 18px 40px rgba(0,0,0,.4);font-size:12px;text-align:center;
+  transform:translateX(-50%);
+}
+.bildirim-mesaji[hidden]{display:none}

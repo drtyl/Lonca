@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0B0B0F">
+  <title>Lonca</title>
+
+  <!-- PWA: uygulama olarak kurulabilmesi için -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lonca">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- ========================= -->
+  <!-- EV EKRANI (Ortak Ev)      -->
+  <!-- ========================= -->
+  <section class="ekran ekran-aktif" data-ekran="ev">
+    <header class="ust-baslik">
+      <h1>Ortak Ev</h1>
+      <span class="ust-baslik-butonlari">
+        <button type="button" class="arama-acma-butonu" id="karakter-ekle-butonu" aria-label="Yeni karakter ekle">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+        <button type="button" class="arama-acma-butonu" data-ekran-hedef="arama" aria-label="Ara">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.3-4.3"></path></svg>
+        </button>
+      </span>
+    </header>
+
+    <p class="bolum-etiketi bolum-etiketi-ilk">Ortak Alanlar</p>
+    <div class="ortak-alan-izgara" id="ortak-alan-izgara"></div>
+
+    <p class="bolum-etiketi">Karakterler</p>
+    <!-- Oda listesi buraya app.js tarafından, karakterler.js'den okunarak dolduruluyor -->
+    <div class="oda-listesi" id="oda-listesi"></div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- ORTAK ALAN EKRANI (genel şablon) -->
+  <!-- Salon / Mutfak / Atölye / Kütüphane / Sanat Odası / Film Odası / Çalışma Odası hepsi bunu kullanır -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="ortak-oda">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ev" aria-label="Geri">←</button>
+      <div class="oda-baslik">
+        <strong id="ortak-oda-isim">—</strong>
+        <small id="ortak-oda-aciklama">—</small>
+      </div>
+      <button type="button" class="ortak-oda-icerik-butonu" id="ortak-oda-icerik-butonu" aria-label="İçerik listesi" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+      </button>
+    </header>
+    <div class="oda-sahne" id="ortak-oda-sahne" aria-hidden="true"></div>
+    <div class="oda-mesajlar" id="ortak-oda-mesajlar" aria-live="polite"></div>
+
+    <form class="sohbet-formu" id="ortak-oda-formu">
+      <button class="sohbet-ekle" type="button" id="ortak-oda-kamera-butonu" title="Fotoğraf çek">＋</button>
+      <input class="sohbet-input" id="ortak-oda-input" type="text" maxlength="300" placeholder="Bir şey yaz...">
+      <button class="sohbet-mikrofon" type="button" id="ortak-oda-mikrofon-butonu" title="Sesli mesaj">🎤</button>
+      <button class="sohbet-gonder" type="submit">→</button>
+    </form>
+  </section>
+
+  <!-- ========================= -->
+  <!-- ODA İÇERİK LİSTESİ (genel şablon) -->
+  <!-- Kütüphane'de kitaplar, Mutfak'ta tarifler, Atölye'de araştırmalar vb. -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="icerik-listesi">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ortak-oda" aria-label="Geri">←</button>
+      <h1 id="icerik-listesi-baslik">Liste</h1>
+      <span></span>
+    </header>
+
+    <div class="katman-icerik">
+      <div class="icerik-zamanlayici" id="icerik-zamanlayici" hidden>
+        <div class="icerik-zamanlayici-sure" id="icerik-zamanlayici-sure">25:00</div>
+        <div class="icerik-zamanlayici-sureler" id="icerik-zamanlayici-sureler"></div>
+        <div class="icerik-zamanlayici-butonlar">
+          <button type="button" class="sihirbaz-geri-butonu" id="icerik-zamanlayici-sifirla-butonu">Sıfırla</button>
+          <button type="button" class="sihirbaz-ileri-butonu" id="icerik-zamanlayici-baslat-butonu">Başlat</button>
+        </div>
+      </div>
+
+      <div class="icerik-ekle-formu">
+        <input type="text" id="icerik-baslik-input" class="sihirbaz-input" maxlength="80" placeholder="Başlık">
+        <div id="icerik-ek-alanlar"></div>
+        <textarea id="icerik-not-input" class="sihirbaz-input" rows="2" maxlength="400" placeholder="Not (opsiyonel)"></textarea>
+        <button type="button" id="icerik-ekle-butonu" class="sihirbaz-ileri-butonu">Ekle</button>
+      </div>
+
+      <div class="icerik-liste" id="icerik-liste"></div>
+      <p class="icerik-bos" id="icerik-bos" hidden>Henüz bir şey eklenmedi.</p>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- İÇERİK DETAY SOHBETİ -->
+  <!-- Bir kayda (ör. bir kitaba) özel, o konuya odaklı sohbet -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="icerik-detay">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" id="icerik-detay-geri-butonu" aria-label="Geri">←</button>
+      <div class="oda-baslik">
+        <strong id="icerik-detay-isim">—</strong>
+        <small id="icerik-detay-alt">—</small>
+      </div>
+      <button type="button" class="oda-sil-butonu" id="icerik-detay-sil-butonu" aria-label="Sil">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5a1.5 1.5 0 0 0 1.5 1.5h5a1.5 1.5 0 0 0 1.5-1.5L18 7"></path></svg>
+      </button>
+    </header>
+    <div class="oda-sahne" id="icerik-detay-sahne" aria-hidden="true"></div>
+    <div class="oda-mesajlar" id="icerik-detay-mesajlar" aria-live="polite"></div>
+
+    <form class="sohbet-formu" id="icerik-detay-formu">
+      <button class="sohbet-ekle" type="button" id="icerik-detay-kamera-butonu" title="Fotoğraf çek">＋</button>
+      <input class="sohbet-input" id="icerik-detay-input" type="text" maxlength="300" placeholder="Bir şey yaz...">
+      <button class="sohbet-mikrofon" type="button" id="icerik-detay-mikrofon-butonu" title="Sesli mesaj">🎤</button>
+      <button class="sohbet-gonder" type="submit">→</button>
+    </form>
+  </section>
+
+  <!-- ========================= -->
+  <!-- ODA EKRANI (genel şablon) -->
+  <!-- Hangi karakterin odası olduğu app.js tarafından belirlenir -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="oda">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ev" aria-label="Geri">←</button>
+      <div class="oda-baslik">
+        <strong id="oda-isim">—</strong>
+        <small id="oda-durum">—</small>
+      </div>
+      <button type="button" class="oda-sil-butonu" id="oda-profil-butonu" aria-label="Karakter sayfası">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </header>
+
+    <div class="oda-sahne" id="oda-sahne" aria-hidden="true"></div>
+    <div class="oda-mesajlar" id="oda-mesajlar" aria-live="polite"></div>
+
+    <form class="sohbet-formu" id="oda-formu">
+      <button class="sohbet-ekle" type="button" id="oda-kamera-butonu" title="Fotoğraf çek">＋</button>
+      <input class="sohbet-input" id="oda-input" type="text" maxlength="300" placeholder="Bir şey yaz...">
+      <button class="sohbet-mikrofon" type="button" id="oda-mikrofon-butonu" title="Sesli mesaj">🎤</button>
+      <button class="sohbet-gonder" type="submit">→</button>
+    </form>
+  </section>
+
+  <!-- ========================= -->
+  <!-- ARAMA EKRANI              -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="arama">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ev" aria-label="Geri">←</button>
+      <h1>Ara</h1>
+      <span></span>
+    </header>
+    <div class="katman-icerik">
+      <input class="arama-input" id="arama-input" type="search" placeholder="Karakter veya görev ara...">
+      <div class="arama-sonuclari" id="arama-sonuclari"></div>
+      <p class="yakinda-metni" id="arama-bos">Aramak istediğin kelimeyi yaz.</p>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- GÖREVLER EKRANI           -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="gorevler">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ev" aria-label="Geri">←</button>
+      <h1>Görevler</h1>
+      <span></span>
+    </header>
+    <div class="katman-icerik">
+      <form class="gorev-formu" id="gorev-formu">
+        <input class="gorev-input" id="gorev-input" type="text" maxlength="120" placeholder="Yeni görev ekle...">
+        <button class="gorev-ekle-butonu" type="submit" aria-label="Ekle">+</button>
+      </form>
+      <div class="cip-grubu" id="gorev-tekrar-secimi">
+        <button type="button" class="cip aktif" data-deger="">Tekrarsız</button>
+        <button type="button" class="cip" data-deger="gunluk">Günlük</button>
+        <button type="button" class="cip" data-deger="haftalik">Haftalık</button>
+      </div>
+      <div class="gorev-listesi" id="gorev-listesi"></div>
+      <p class="yakinda-metni" id="gorev-bos" hidden>Henüz görev yok — yukarıdan ekleyebilirsin.</p>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- AYARLAR EKRANI            -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="ayarlar">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ev" aria-label="Geri">←</button>
+      <h1>Ayarlar</h1>
+      <span></span>
+    </header>
+    <div class="katman-icerik">
+      <div class="ayar-karti">
+        <strong>Lonca</strong>
+        <small>Ortak Ev — sürüm 0.9</small>
+      </div>
+      <div class="ayar-karti">
+        <strong>Yapay Zeka</strong>
+        <small>Karakterlerin cevap verebilmesi için Groq API anahtarın</small>
+        <input class="ayar-input" id="api-anahtari-input" type="password" placeholder="gsk_...">
+        <button type="button" class="ayar-kaydet-butonu" id="api-anahtari-kaydet-butonu">Kaydet</button>
+        <p>Anahtar sadece bu cihazda saklanır, koda ya da GitHub'a hiç gönderilmez.</p>
+      </div>
+      <div class="ayar-karti">
+        <strong>Sesli Sohbet</strong>
+        <small>Mikrofon, karakter sesleri ve kulaklık modu</small>
+        <label class="ayar-anahtar">
+          <span>Mesajları sesli oku (karakter başına farklı ses)</span>
+          <input type="checkbox" id="sesli-okuma-kutusu" checked>
+        </label>
+        <label class="ayar-anahtar">
+          <span>Kulaklık modu — karakter odalarında cevap otomatik sesli okunsun</span>
+          <input type="checkbox" id="kulaklik-modu-kutusu">
+        </label>
+      </div>
+      <div class="ayar-karti">
+        <strong>Bildirimler</strong>
+        <small>OneSignal App ID'ni gir, telefon kilitliyken de haber alabilirsin</small>
+        <input class="ayar-input" id="onesignal-appid-input" type="text" placeholder="OneSignal App ID">
+        <button type="button" class="ayar-kaydet-butonu" id="onesignal-kaydet-butonu">Kaydet ve Etkinleştir</button>
+        <p>Gizli REST anahtarı bu uygulamaya hiç girilmiyor — sadece herkese açık App ID.</p>
+      </div>
+      <div class="ayar-karti">
+        <strong>Geliştirme (deneysel)</strong>
+        <small>Lonca kendi kodunu Groq ile geliştirebilsin — her değişiklik senin onayından geçer, otomatik uygulanmaz</small>
+        <input class="ayar-input" id="github-anahtari-input" type="text" placeholder="GitHub erişim anahtarı">
+        <input class="ayar-input" id="github-repo-input" type="text" placeholder="kullanici-adi/repo-adi">
+        <button type="button" class="ayar-kaydet-butonu" id="github-kaydet-butonu">Kaydet</button>
+        <button type="button" class="ayar-ikincil-buton" data-ekran-hedef="gelistirme-iste">Geliştirme İste</button>
+        <button type="button" class="ayar-ikincil-buton" data-ekran-hedef="gelistirme-onerileri">Geliştirme Önerilerim</button>
+      </div>
+      <div class="ayar-karti">
+        <strong>Veriler</strong>
+        <small>Sohbetler ve görevler bu cihazda saklanır</small>
+        <button type="button" class="tehlikeli-buton" id="verileri-sifirla-butonu">Tüm sohbet ve görev verilerini sıfırla</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- GELİŞTİRME İSTE           -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="gelistirme-iste">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ayarlar" aria-label="Geri">←</button>
+      <h1>Geliştirme İste</h1>
+      <span></span>
+    </header>
+    <div class="katman-icerik">
+      <p class="gelistirme-aciklama">Küçük, somut bir değişiklik iste — örn. "Film Odası'na film puanlama alanı ekle". Büyük ya da belirsiz istekler için uygun değil, ajan böyle bir istekte "yapamam" diyecektir.</p>
+      <textarea class="sihirbaz-input" id="gi-istek-input" rows="4" maxlength="500" placeholder="Ne değiştirmek istersin?"></textarea>
+      <button type="button" class="sihirbaz-ileri-butonu" id="gi-gonder-butonu">Öneri Oluştur</button>
+      <div class="gelistirme-durum" id="gi-durum" hidden></div>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- GELİŞTİRME ÖNERİLERİM     -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="gelistirme-onerileri">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ayarlar" aria-label="Geri">←</button>
+      <h1>Geliştirme Önerilerim</h1>
+      <span></span>
+    </header>
+    <div class="katman-icerik">
+      <div class="icerik-liste" id="go-liste"></div>
+      <p class="icerik-bos" id="go-bos" hidden>Henüz bir öneri yok.</p>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- GELİŞTİRME DETAY          -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="gelistirme-detay">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="gelistirme-onerileri" aria-label="Geri">←</button>
+      <h1>Öneri</h1>
+      <span></span>
+    </header>
+    <div class="katman-icerik">
+      <p class="gelistirme-istek-metni" id="gd-istek">—</p>
+      <div class="gelistirme-aciklama-kutusu" id="gd-aciklama">—</div>
+      <button type="button" class="gelistirme-teknik-goster" id="gd-teknik-goster-butonu">Teknik detayı göster</button>
+      <pre class="gelistirme-yama" id="gd-yama" hidden></pre>
+      <div class="sihirbaz-nav" id="gd-butonlar">
+        <button type="button" class="sihirbaz-geri-butonu" id="gd-reddet-butonu">Reddet</button>
+        <button type="button" class="sihirbaz-ileri-butonu" id="gd-uygula-butonu">Uygula</button>
+      </div>
+      <p class="gelistirme-durum-etiketi" id="gd-durum-etiketi" hidden></p>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- YENİ KARAKTER SİHİRBAZI   -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="karakter-olustur">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="ev" aria-label="Vazgeç">←</button>
+      <h1>Yeni Karakter</h1>
+      <span></span>
+    </header>
+
+    <div class="katman-icerik sihirbaz">
+      <div class="sihirbaz-adimlar">
+        <span class="sihirbaz-nokta aktif" data-adim-nokta="1"></span>
+        <span class="sihirbaz-nokta" data-adim-nokta="2"></span>
+        <span class="sihirbaz-nokta" data-adim-nokta="3"></span>
+        <span class="sihirbaz-nokta" data-adim-nokta="4"></span>
+        <span class="sihirbaz-nokta" data-adim-nokta="5"></span>
+      </div>
+
+      <!-- ADIM 1: İsim, renk, fotoğraf -->
+      <div class="sihirbaz-adim adim-aktif" data-adim="1">
+        <label class="sihirbaz-etiket" for="sk-isim">Adı ne olsun?</label>
+        <input class="sihirbaz-input" id="sk-isim" type="text" maxlength="20" placeholder="Örn. Nova">
+
+        <label class="sihirbaz-etiket">Rengi</label>
+        <div class="renk-paleti" id="sk-renk-paleti"></div>
+
+        <label class="sihirbaz-etiket">Profil fotoğrafı (opsiyonel)</label>
+        <div class="foto-secici">
+          <div class="foto-onizleme" id="sk-foto-onizleme">?</div>
+          <label class="foto-sec-butonu" for="sk-foto-input">Galeriden Seç</label>
+          <input type="file" accept="image/*" id="sk-foto-input" hidden>
+        </div>
+      </div>
+
+      <!-- ADIM 2: Kişilik soruları -->
+      <div class="sihirbaz-adim" data-adim="2">
+        <label class="sihirbaz-etiket">Enerjisi nasıl?</label>
+        <div class="cip-grubu" data-soru="enerji">
+          <button type="button" class="cip" data-deger="enerjik">Enerjik</button>
+          <button type="button" class="cip" data-deger="sakin">Sakin</button>
+          <button type="button" class="cip" data-deger="dengeli">Dengeli</button>
+        </div>
+
+        <label class="sihirbaz-etiket">Konuşma tonu</label>
+        <div class="cip-grubu" data-soru="ton">
+          <button type="button" class="cip" data-deger="şakacı">Şakacı</button>
+          <button type="button" class="cip" data-deger="ciddi">Ciddi</button>
+          <button type="button" class="cip" data-deger="sıcak">Sıcak</button>
+        </div>
+
+        <label class="sihirbaz-etiket">Sana yaklaşımı</label>
+        <div class="cip-grubu" data-soru="yaklasim">
+          <button type="button" class="cip" data-deger="doğrudan">Doğrudan</button>
+          <button type="button" class="cip" data-deger="nazik">Nazik</button>
+          <button type="button" class="cip" data-deger="meraklı">Meraklı</button>
+        </div>
+
+        <label class="sihirbaz-etiket" for="sk-ilgi">İlgi alanı (opsiyonel)</label>
+        <input class="sihirbaz-input" id="sk-ilgi" type="text" maxlength="60" placeholder="Örn. müzik, kitaplar">
+      </div>
+
+      <!-- ADIM 3: Geri bildirim tarzı + değerler -->
+      <div class="sihirbaz-adim" data-adim="3">
+        <label class="sihirbaz-etiket">Sana bir eksik/yanlış gördüğünde nasıl söylesin?</label>
+        <div class="cip-grubu" data-soru="geriBildirimTarzi">
+          <button type="button" class="cip" data-deger="sert">Doğrudan &amp; sert</button>
+          <button type="button" class="cip" data-deger="dengeli">Dengeli</button>
+          <button type="button" class="cip" data-deger="yumusak">Yumuşak &amp; şefkatli</button>
+        </div>
+
+        <label class="sihirbaz-etiket">Neye önem verir? (en fazla 3 seç)</label>
+        <div class="cip-grubu" id="sk-degerler-grubu">
+          <button type="button" class="cip" data-deger="disiplin">Disiplin</button>
+          <button type="button" class="cip" data-deger="yaratıcılık">Yaratıcılık</button>
+          <button type="button" class="cip" data-deger="dürüstlük">Dürüstlük</button>
+          <button type="button" class="cip" data-deger="rahatlık">Rahatlık</button>
+          <button type="button" class="cip" data-deger="merak">Merak</button>
+          <button type="button" class="cip" data-deger="sadakat">Sadakat</button>
+        </div>
+      </div>
+
+      <!-- ADIM 4: Hitap -->
+      <div class="sihirbaz-adim" data-adim="4">
+        <label class="sihirbaz-etiket" for="sk-hitap">Sana nasıl hitap etsin?</label>
+        <input class="sihirbaz-input" id="sk-hitap" type="text" maxlength="24" placeholder="Örn. Dostum, Patron, Sen">
+      </div>
+
+      <!-- ADIM 5: Önizleme -->
+      <div class="sihirbaz-adim" data-adim="5">
+        <div class="sk-onizleme-karti">
+          <span class="oda-avatar" id="sk-onizleme-avatar"></span>
+          <strong id="sk-onizleme-isim">—</strong>
+          <small id="sk-onizleme-uslup">—</small>
+        </div>
+      </div>
+
+      <div class="sihirbaz-nav">
+        <button type="button" class="sihirbaz-geri-butonu" id="sk-geri-butonu">Geri</button>
+        <button type="button" class="sihirbaz-ileri-butonu" id="sk-ileri-butonu">İleri</button>
+        <button type="button" class="sihirbaz-kaydet-butonu" id="sk-kaydet-butonu" hidden>Karakteri Ekle</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- KARAKTER SAYFASI (düzenleme) -->
+  <!-- ========================= -->
+  <section class="ekran" data-ekran="karakter-profili">
+    <header class="katman-ust">
+      <button type="button" class="geri-butonu" data-ekran-hedef="oda" aria-label="Geri">←</button>
+      <h1>Karakter</h1>
+      <span></span>
+    </header>
+
+    <div class="katman-icerik sihirbaz">
+      <label class="sihirbaz-etiket" for="kp-isim">İsim</label>
+      <input class="sihirbaz-input" id="kp-isim" type="text" maxlength="20">
+
+      <label class="sihirbaz-etiket">Rengi</label>
+      <div class="renk-paleti" id="kp-renk-paleti"></div>
+
+      <label class="sihirbaz-etiket">Profil fotoğrafı</label>
+      <div class="foto-secici">
+        <div class="foto-onizleme" id="kp-foto-onizleme">?</div>
+        <label class="foto-sec-butonu" for="kp-foto-input">Galeriden Seç</label>
+        <input type="file" accept="image/*" id="kp-foto-input" hidden>
+      </div>
+
+      <label class="sihirbaz-etiket" for="kp-hitap">Sana nasıl hitap ediyor?</label>
+      <input class="sihirbaz-input" id="kp-hitap" type="text" maxlength="24">
+
+      <label class="sihirbaz-etiket" for="kp-uslup">Kişiliği</label>
+      <textarea class="sihirbaz-input" id="kp-uslup" rows="2" maxlength="200"></textarea>
+
+      <label class="sihirbaz-etiket">Geri bildirim tarzı</label>
+      <div class="cip-grubu" data-soru="geriBildirimTarzi" id="kp-geribildirim-grubu">
+        <button type="button" class="cip" data-deger="sert">Doğrudan &amp; sert</button>
+        <button type="button" class="cip" data-deger="dengeli">Dengeli</button>
+        <button type="button" class="cip" data-deger="yumusak">Yumuşak &amp; şefkatli</button>
+      </div>
+
+      <label class="sihirbaz-etiket">Değerleri (en fazla 3)</label>
+      <div class="cip-grubu" id="kp-degerler-grubu">
+        <button type="button" class="cip" data-deger="disiplin">Disiplin</button>
+        <button type="button" class="cip" data-deger="yaratıcılık">Yaratıcılık</button>
+        <button type="button" class="cip" data-deger="dürüstlük">Dürüstlük</button>
+        <button type="button" class="cip" data-deger="rahatlık">Rahatlık</button>
+        <button type="button" class="cip" data-deger="merak">Merak</button>
+        <button type="button" class="cip" data-deger="sadakat">Sadakat</button>
+      </div>
+
+      <div class="sihirbaz-nav">
+        <button type="button" class="sihirbaz-kaydet-butonu" id="kp-kaydet-butonu">Kaydet</button>
+      </div>
+      <button type="button" class="tehlikeli-buton" id="kp-sil-butonu">Karakteri Sil</button>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- ALT GEZİNME               -->
+  <!-- ========================= -->
+  <nav class="alt-bar" aria-label="Ana gezinme">
+    <button class="alt-bar-secim aktif" type="button" data-ekran-hedef="ev">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5"></path><path d="M6 10v9h5v-5h2v5h5v-9"></path></svg>
+      <small>Ev</small>
+    </button>
+    <button class="alt-bar-secim" type="button" id="nav-salon-butonu">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.8 6.5a1.5 1.5 0 0 1 1.5-1.5h11.4A1.5 1.5 0 0 1 19.2 6.5v7a1.5 1.5 0 0 1-1.5 1.5h-8l-4 3.3v-3.3h-.4a1.5 1.5 0 0 1-1.5-1.5z"></path></svg>
+      <small>Salon</small>
+    </button>
+    <button class="alt-bar-secim" type="button" data-ekran-hedef="gorevler">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5.5" y="4.5" width="13" height="16" rx="2"></rect><path d="M8.5 12.3l2 2 4.5-4.8"></path></svg>
+      <small>Görevler</small>
+    </button>
+    <button class="alt-bar-secim" type="button" data-ekran-hedef="ayarlar">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h9M17 7h2M5 17h2M10 17h9"></path><circle cx="15" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle></svg>
+      <small>Ayarlar</small>
+    </button>
+  </nav>
+
+  <!-- Kamera arayüzü (fotoğraf çekme) -->
+  <div class="kamera-overlay" id="kamera-overlay" hidden>
+    <video class="kamera-video" id="kamera-video" autoplay playsinline muted></video>
+    <canvas class="kamera-canvas" id="kamera-canvas" hidden></canvas>
+    <div class="kamera-kontroller">
+      <button class="kamera-kapat" type="button" id="kamera-kapat-butonu" title="Vazgeç">×</button>
+      <button class="kamera-cek" type="button" id="kamera-cek-butonu" title="Fotoğraf çek"></button>
+      <span class="kamera-kontroller-bosluk" aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <div class="bildirim-mesaji" id="bildirim-mesaji" hidden></div>
+
+  <script type="module" src="./js/app.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./sw.js").catch(function (hata) {
+          console.error("Service worker kaydedilemedi:", hata);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
