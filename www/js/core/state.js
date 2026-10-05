@@ -91,12 +91,8 @@ export function karakterSil(karakterId) {
    ortak alan id'si ya da içerik-öğesi id'si, hepsi bu tek objede. */
 
 let mesajGecmisi = depodanOku(ANAHTARLAR.MESAJLAR) || {};
-if (Object.keys(mesajGecmisi).length === 0) {
-  mesajGecmisi.salon = [
-    { kimden: "luna", tur: "metin", icerik: "Bu akşam hep birlikte bir şeyler konuşalım mı?", saat: saatOlustur() },
-    { kimden: "atlas", tur: "metin", icerik: "Kütüphanede ilginç bir kaynak buldum.", saat: saatOlustur() }
-  ];
-}
+/* Adım 1 — "boş kabuk": hiçbir örnek/sahte konuşmayla doğmuyoruz.
+   Salon ve diğer ortak alanlar da tamamen boş başlar. */
 KARAKTERLER.forEach((k) => { if (!mesajGecmisi[k.id]) mesajGecmisi[k.id] = []; });
 ORTAK_ALANLAR.forEach((o) => { if (!mesajGecmisi[o.id]) mesajGecmisi[o.id] = []; });
 
