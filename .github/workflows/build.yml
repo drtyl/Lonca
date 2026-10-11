@@ -1,0 +1,41 @@
+name: APK Derle
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1) 3D kütüphaneleri indir ve uygulamanın içine göm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 3D kütüphaneleri paketle
+        run: |
+          npm install --no-audit --no-fund
+          npm run vendor
+          ls -la app/src/main/assets/www/js/
+
+      # 2) APK'yı derle
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: APK oluştur
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: APK'yı indirilebilir yap
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lonca-v0-apk
+          path: app/build/outputs/apk/debug/app-debug.apk

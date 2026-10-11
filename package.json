@@ -1,20 +1,15 @@
 {
-  "name": "lonca",
-  "version": "0.5.0",
+  "name": "lonca-web",
   "private": true,
-  "description": "Lonca — Ortak Ev. Capacitor ile native Android sarmalayıcı.",
+  "description": "Lonca'nın 3D kütüphanelerini (three.js + three-vrm) tek dosyaya paketler. GitHub Actions bunu APK'dan önce çalıştırır.",
   "scripts": {
-    "sync": "cap sync android"
+    "vendor": "esbuild web-src/vendor.js --bundle --minify --format=iife --target=es2019 --outfile=app/src/main/assets/www/js/vendor.js"
   },
   "dependencies": {
-    "@capacitor/android": "latest",
-    "@capacitor/core": "latest",
-    "@capacitor/local-notifications": "latest",
-    "@capacitor-community/speech-recognition": "latest",
-    "@capacitor-community/text-to-speech": "latest",
-    "@onesignal/capacitor-plugin": "latest"
+    "three": "~0.169.0",
+    "@pixiv/three-vrm": "^3.1.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "latest"
+    "esbuild": "^0.24.0"
   }
 }
